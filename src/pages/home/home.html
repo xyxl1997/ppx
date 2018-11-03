@@ -1,0 +1,13 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>91徐先生原创出品</ion-title>
+    </ion-navbar>
+</ion-header>
+<ion-content>
+    <div class="title">输入ppx25.com播放视频地址</div>
+    <div (click)="goppx()" class="goppx">点击进入皮皮虾~</div>
+    <ion-input [(ngModel)]="url" class="url-input" placeholder="请输入播放地址"></ion-input>
+    <button (click)="add()" class="decode">解析地址</button>
+    <button (click)="play()" class="play">播放视频</button>
+    <button (click)="test()">测试</button>
+</ion-content>
