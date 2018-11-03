@@ -26,13 +26,21 @@ var query = {
 	ppx: {
 		addVideo: function (request, success) {
 			getPostParams(request, params => {
-				selectMQL(params, "*", "video", "", res => {
+				selectMQL({ title: params.title, image: params.image }, "*", "video", "", res => {
 					if (res.length == 0) {
 						insertMQL(params, "video", res => {
 							success(res)
 						})
-					}else{
-						success("该视频已存在");
+					} else {
+						let sql = "update video set video = '"+ params.video +"' where id = " + res;
+						connection.query(sql, (error, res) => {
+							if (error) {
+								console.log(error);
+								return;
+							}
+							success(res);
+						})
+						success("视频更新成功");
 					}
 				})
 			})
