@@ -23,9 +23,13 @@ function handleError(error) {
 	connect();
 }
 var query = {
-	test: {
-		get: function (request, success) {
-			success("hello world");
+	ppx: {
+		addVideo: function (request, success) {
+			getPostParams(request,params=>{
+				insertMQL(params,"video",res=>{
+					success(res)
+				})
+			})
 		}
 	},
 	day: {

@@ -1,9 +1,9 @@
 var http = require("http");
 var url = require("url");
+
 /**
  * 捕获所有未捕获的异常，防止断开连接
  */
-
 process.on('uncaughtException', function (error) {
 	console.log(error);
 })
