@@ -25,9 +25,14 @@ function handleError(error) {
 var query = {
 	ppx: {
 		addVideo: function (request, success) {
-			getPostParams(request,params=>{
-				insertMQL(params,"video",res=>{
-					success(res)
+			getPostParams(request, params => {
+				selectMQL(params, "*", "video", {}, res => {
+					success("该视频已存在");
+					if (res.length == 0) {
+						insertMQL(params, "video", res => {
+							success(res)
+						})
+					}
 				})
 			})
 		}
