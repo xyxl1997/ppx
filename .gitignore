@@ -1,34 +1,19 @@
-# Specifies intentionally untracked files to ignore when using Git
-# http://git-scm.com/docs/gitignore
-
-*~
-*.sw[mnpcod]
-*.log
-*.tmp
-*.tmp.*
-log.txt
-*.sublime-project
-*.sublime-workspace
-.vscode/
-npm-debug.log*
-
-.idea/
-.sass-cache/
-.tmp/
-.versions/
-coverage/
-dist/
+# Build and Release Folders
+bin-debug/
+bin-release/
 node_modules/
-tmp/
-temp/
-hooks/
-platforms/
-plugins/
-plugins/android.json
-plugins/ios.json
-www/
-$RECYCLE.BIN/
+[Oo]bj/
+[Bb]in/
 
-.DS_Store
-Thumbs.db
-UserInterfaceState.xcuserstate
+# Other files and folders
+.settings/
+
+# Executables
+*.swf
+*.air
+*.ipa
+*.apk
+
+# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
+# should NOT be excluded as they contain compiler settings and other important
+# information for Eclipse / Flash Builder.
