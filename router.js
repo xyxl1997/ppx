@@ -1,7 +1,7 @@
 var mysql = require("./mysql");
 
 function route(pathname, request, response) {
-	let path = pathname.split('/');
+	var path = pathname.split('/');
 	path.shift(); // 删除第一个空字符串
 	var now = mysql.query;
 	path.forEach((v) => {
