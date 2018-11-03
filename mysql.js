@@ -38,9 +38,8 @@ var query = {
 								console.log(error);
 								return;
 							}
-							success(res);
+							success("视频更新成功");
 						})
-						success("视频更新成功");
 					}
 				})
 			})
