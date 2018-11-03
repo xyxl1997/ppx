@@ -32,7 +32,7 @@ var query = {
 							success(res)
 						})
 					} else {
-						let sql = "update video set video = '"+ params.video +"' where id = " + res.id;
+						let sql = "update video set video = '"+ params.video +"' where id = " + res[0].id;
 						connection.query(sql, (error, res) => {
 							if (error) {
 								console.log(error);
