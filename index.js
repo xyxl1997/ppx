@@ -1,3 +1,4 @@
+require('babel-register');
 var server = require("./server");
 var router = require("./router");
  
