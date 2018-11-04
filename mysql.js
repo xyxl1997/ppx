@@ -43,6 +43,13 @@ var query = {
 					}
 				})
 			})
+		},
+		search:function(request,success){
+			getGetParams(request,params=>{
+				selectListMQL(params,'*','video','',res=>{
+					success(res);
+				})
+			})
 		}
 	},
 	day: {
