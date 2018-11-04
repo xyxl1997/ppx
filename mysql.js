@@ -32,7 +32,7 @@ var query = {
 							success(res)
 						})
 					} else {
-						let sql = "update video set video = '"+ params.video +"' where id = " + res[0].id;
+						let sql = "update video set video = '" + params.video + "' where id = " + res[0].id;
 						connection.query(sql, (error, res) => {
 							if (error) {
 								console.log(error);
@@ -44,9 +44,15 @@ var query = {
 				})
 			})
 		},
-		search:function(request,success){
-			getGetParams(request,params=>{
-				selectListMQL(params,'*','video','',res=>{
+		search: function (request, success) {
+			getGetParams(request, params => {
+				let sql = `select * from video where title like '%${params.title}%' limit ${params.offset},${params.limit}`;
+				connection.query(sql, (error, res) => {
+					if (error) {
+						console.log(error);
+						return;
+					}
+					success = success || function () { }
 					success(res);
 				})
 			})
