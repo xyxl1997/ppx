@@ -70,7 +70,19 @@ var query = {
 				})
 			})
 		},
-
+		addPlayCount(request, success) {
+			getPostParams(request, params => {
+				let sql = `update video set play_count = play_count + 1 where id = ${params.id}`;
+				connection.query(sql,(error,res)=>{
+					if (error) {
+						console.log(error);
+						return;
+					}
+					success = success || function () { }
+					success(res);
+				})
+			})
+		}
 	},
 	day: {
 		getList: function (request, success) {
@@ -112,85 +124,6 @@ var query = {
 		update: function (request, success) {
 
 		},
-		top: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					let sql = "update day set top = " + params.top + ",top_time = now() where id = " + params.id;
-					connection.query(sql, (error, res) => {
-						if (error) {
-							console.log(error);
-							return;
-						}
-						success(res);
-					})
-				})
-			})
-		}
-	},
-	memo: {
-		getList: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectListMQL(params, "*", "memo_view", "order by update_time desc", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		add: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getPostParams(request, params => {
-					params.user_id = user.id;
-					insertMQL(params, "memo", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		get: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectMQL(params, "*", "memo_view", "", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		update: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					let sql = "update memo set content = '" + params.content + "' where id =" + params.id;
-					connection.query(sql, (error, res) => {
-						if (error) {
-							console.log(error);
-							return;
-						}
-						success(res);
-					})
-				})
-			})
-		},
-		delete: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					deleteMQL(params, "memo", res => {
-						success(res)
-					})
-				})
-			})
-		},
-		star: function (request, success) {
-			getGetParams(request, params => {
-				let sql = "update memo set star = " + params.star + " where id = " + params.id;
-				connection.query(sql, (error, res) => {
-					if (error) {
-						console.log(error);
-						return;
-					}
-					success(res);
-				})
-			})
-		}
 	},
 	message: {
 		getList: function (request, success) {
@@ -334,35 +267,7 @@ var query = {
 			})
 		}
 	},
-	photo: {
-		getList: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectListMQL(params, "*", "photo", "order by creat_time desc", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		add: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getPostParams(request, params => {
-					insertMQL(params, "photo", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		delete: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					deleteMQL(params, "photo", res => {
-						success(res);
-					})
-				})
-			})
-		}
-	},
+
 	// upload: function (request, success) {
 	// 	var bucket = "xuyang"
 	// 	var accessKey = 'iWyuGIutQLEBsbkQ9aVtJdafnk35_M33LFeeUsYc';
