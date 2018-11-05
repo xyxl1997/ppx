@@ -462,7 +462,7 @@ function insertMQL(params, table, success) {
 	let keys = [];
 	let values = [];
 	for (key in params) {
-		keys.push(key);
+		keys.push("`" + key + "`");
 		values.push("'" + params[key] + "'");
 	}
 	keys = keys.join(',');
