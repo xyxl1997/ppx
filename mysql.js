@@ -46,6 +46,19 @@ var query = {
 		},
 		search: function (request, success) {
 			getGetParams(request, params => {
+				selectMQL({ key: params.title }, "id", "search_key", "", res => {
+					if (res.length == 0) {
+						insertMQL({ key: params.title, count: 1 }, "search_key");
+					} else {
+						let sql = `update search_key set count = count + 1 where id = ${res[0].id}`;
+						connection.query(sql, (error, res) => {
+							if (error) {
+								console.log(error);
+								return;
+							}
+						})
+					}
+				})
 				let sql = `select * from video where title like '%${params.title}%' limit ${params.offset},${params.limit}`;
 				connection.query(sql, (error, res) => {
 					if (error) {
@@ -56,7 +69,8 @@ var query = {
 					success(res);
 				})
 			})
-		}
+		},
+
 	},
 	day: {
 		getList: function (request, success) {
