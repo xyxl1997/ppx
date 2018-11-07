@@ -46,7 +46,7 @@ var query = {
 		},
 		search: function (request, success) {
 			getGetParams(request, params => {
-				selectMQL({ key: params.title }, "id", "search_key", "", res => {
+				selectMQL({ key: params.title }, "id", "search_key", "order by id desc", res => {
 					if (res.length == 0) {
 						insertMQL({ key: params.title, count: 1 }, "search_key");
 					} else {
@@ -70,16 +70,32 @@ var query = {
 				})
 			})
 		},
+		getHotVideo(request, success) {
+			getGetParams(request, params => {
+				selectListMQL(params, "*", "video", "order by play_count desc,updated_at desc", res => {
+					success(res);
+				})
+			})
+		},
+		getRecommend(request, success) {
+			getGetParams(request, params => {
+				selectMQL("", "count(*) as count", "video", "", res => {
+					selectListMQL({ offset: 0, limit: 10 }, "*", "video", "order by rand()", res => {
+						success(res);
+					})
+				})
+			})
+		},
 		addPlayCount(request, success) {
 			getPostParams(request, params => {
 				let sql = `update video set play_count = play_count + 1 where id = ${params.id}`;
-				connection.query(sql,(error,res)=>{
+				connection.query(sql, (error, res) => {
 					if (error) {
 						console.log(error);
 						return;
 					}
 					success = success || function () { }
-					success(res);
+					success("success");
 				})
 			})
 		}
