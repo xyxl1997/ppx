@@ -46,7 +46,7 @@ var query = {
 		},
 		search: function (request, success) {
 			getGetParams(request, params => {
-				selectMQL({ key: params.title }, "id", "search_key", "order by id desc", res => {
+				selectMQL({ key: params.title }, "id", "search_key", "", res => {
 					if (res.length == 0) {
 						insertMQL({ key: params.title, count: 1 }, "search_key");
 					} else {
@@ -59,7 +59,7 @@ var query = {
 						})
 					}
 				})
-				let sql = `select * from video where title like '%${params.title}%' limit ${params.offset},${params.limit}`;
+				let sql = `select * from video where title like '%${params.title}%' order by id desc limit ${params.offset},${params.limit}`;
 				connection.query(sql, (error, res) => {
 					if (error) {
 						console.log(error);
