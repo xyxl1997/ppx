@@ -79,10 +79,15 @@ var query = {
 		},
 		getRecommend(request, success) {
 			getGetParams(request, params => {
-				selectMQL("", "count(*) as count", "video", "", res => {
-					selectListMQL({ offset: 0, limit: 10 }, "*", "video", "order by rand()", res => {
-						success(res);
-					})
+				selectListMQL({ offset: 0, limit: 10 }, "*", "video", "order by rand()", res => {
+					success(res);
+				})
+			})
+		},
+		getHotKey(request, success) {
+			getGetParams(request, params => {
+				selectListMQL(params,"*","search_key","and `key` != '' order by `count` desc",res=>{
+					success(res);
 				})
 			})
 		},
