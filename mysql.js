@@ -1,5 +1,6 @@
 ﻿var mysql = require('mysql');
 var url = require('url');
+const md5 = require('md5');
 // var qiniu = require('qiniu');
 var connection;
 connect();
@@ -86,7 +87,7 @@ var query = {
 		},
 		getHotKey(request, success) {
 			getGetParams(request, params => {
-				selectListMQL(params,"*","search_key","and `key` != '' order by `count` desc",res=>{
+				selectListMQL(params, "*", "search_key", "and `key` != '' order by `count` desc", res => {
 					success(res);
 				})
 			})
@@ -103,191 +104,77 @@ var query = {
 					success("success");
 				})
 			})
-		}
-	},
-	day: {
-		getList: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectListMQL(params, "*", "day_view", "order by top desc,top_time desc", res => {
-						success(res);
-					})
-				})
-			})
 		},
-		add: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getPostParams(request, params => {
-					insertMQL(params, "day", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		delete: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					deleteMQL(params, "day", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		get: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectMQL(params, "*", "day_view", "", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		update: function (request, success) {
-
-		},
-	},
-	message: {
-		getList: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectListMQL(params, "*", "message_view", "order by creat_time desc", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		get: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectMQL(params, "*", "message_view", "", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		add: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getPostParams(request, params => {
-					params.user_id = user.id;
-					insertMQL(params, "message", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		delete: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					deleteMQL(params, "massage", res => {
-						success(res);
-					})
-				})
-			})
-		}
-	},
-	dayBg: {
-		get: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectMQL(params, "*", "day_bg", "", res => {
-						success(res);
-					})
-				})
-			})
-		}
-	},
-	sliderBg: {
-		getList: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					selectListMQL(params, "*", "slider_bg", "", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		add: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getPostParams(request, params => {
-					insertMQL(params, "slider_bg", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		delete: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					deleteMQL(params, "slider_bg", res => {
-						success(res)
-					})
-				})
-			})
-		}
-	},
-	user: {
-		login: function (request, success) {
+		// 注册
+		userRegister(request, success) {
 			getPostParams(request, params => {
-				selectMQL(params, "*", "user", "", res => {
-					if (res.length == 1) {
-						let user = {
-							user: res[0].user
-						};
-						let session_key = new Date().getTime() + "" + res[0].user + new Date().getTime() + res[0].id;
-						console.log("session_key = " + session_key);
-						connection.query("update user set session_key = '" + session_key + "' where id = " + res[0].id, (error, res) => {
+				selectMQL({ account: params.account }, "*", "user", "", res => {
+					if (res.length == 0) {
+						let now = new Date();
+						insertMQL({
+							account: params.account,
+							password: params.password,
+							vip_date: now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds()
+						}, "user", res => {
+							console.log(res)
+							if (res.id > 0) {
+								success({
+									res: true,
+									message: "注册成功",
+									datas: res
+								})
+							} else {
+								success({
+									res: false,
+									message: "未知错误"
+								})
+							}
+						})
+					} else {
+						success({
+							res: false,
+							message: "该账号已被注册"
+						})
+					}
+				})
+			})
+		},
+		// 登录
+		userLogin(request, success) {
+			getPostParams(request, params => {
+				console.log(params)
+				selectMQL({
+					account: params.account,
+					password: params.password
+				}, "*", "user", "", res => {
+
+					if (res.length > 0) {
+						let token = md5(new Date().getTime() + res[0].account);
+						let sql = `update ppx.user set \`token\` = '${token}' where id = '${res[0].id}'`;
+						connection.query(sql, (error, res) => {
 							if (error) {
 								console.log(error);
 								return;
 							}
-							user.session_key = session_key;
-							success(user);
-						});
-					}
-					else {
-						success(false)
-					}
-				})
-			})
-		},
-		regist: function (request, success) {
-			getPostParams(request, params => {
-				selectMQL(params, "*", "user", "", res => {
-					if (res.length == 0) {
-						insertMQL(params, "user", res => {
-							success(res);
+							success({
+								res: true,
+								message: "登录成功",
+								datas: {
+									token: token
+								}
+							})
 						})
 					} else {
 						success({
-							id: 0
-						});
+							res: false,
+							message: "账号或密码错误"
+						})
 					}
-				})
-			})
-		},
-		get: function (request, success) {
-			checkSessionKey(request, success, user => {
-				getGetParams(request, params => {
-					params.id = user.id;
-					selectMQL(params, "*", "user", "", res => {
-						success(res);
-					})
-				})
-			})
-		},
-		update: function (request, success) {
-			getPostParams(request, params => {
-				let sql = "update user set nickname = '" + params.nickname + "',head_image = '" + params.head_image + "' where id = " + params.id;
-				connection.query(sql, (error, res) => {
-					if (error) {
-						console.log(error);
-						return;
-					}
-					success(res);
 				})
 			})
 		}
 	},
+
 
 	// upload: function (request, success) {
 	// 	var bucket = "xuyang"
@@ -434,18 +321,11 @@ function deleteMQL(params, table, success) {
 /**
  * 判断session_key权限
  */
-function checkSessionKey(request, success, user) {
+function checkSessionKey(request, user) {
 	selectMQL({
-		session_key: request.headers['session-key']
+		token: request.headers['token']
 	}, "*", "user", "", res => {
-		if (res.length == 0) {
-			success({
-				result: false,
-				mes: "没有权限"
-			})
-		} else {
-			user(res[0]);
-		}
+		user(res[0]);
 	})
 }
 module.exports = {
