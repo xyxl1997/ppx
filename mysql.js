@@ -119,20 +119,20 @@ var query = {
 							console.log(res)
 							if (res.id > 0) {
 								success({
-									res: true,
+									result: true,
 									message: "注册成功",
 									datas: res
 								})
 							} else {
 								success({
-									res: false,
+									result: false,
 									message: "未知错误"
 								})
 							}
 						})
 					} else {
 						success({
-							res: false,
+							result: false,
 							message: "该账号已被注册"
 						})
 					}
@@ -147,7 +147,6 @@ var query = {
 					account: params.account,
 					password: params.password
 				}, "*", "user", "", res => {
-
 					if (res.length > 0) {
 						let token = md5(new Date().getTime() + res[0].account);
 						let sql = `update ppx.user set \`token\` = '${token}' where id = '${res[0].id}'`;
@@ -157,7 +156,7 @@ var query = {
 								return;
 							}
 							success({
-								res: true,
+								result: true,
 								message: "登录成功",
 								datas: {
 									token: token
@@ -166,11 +165,19 @@ var query = {
 						})
 					} else {
 						success({
-							res: false,
+							result: false,
 							message: "账号或密码错误"
 						})
 					}
 				})
+			})
+		},
+		checkToken(request, success) {
+			checkToken(request, user => {
+				success({
+					datas: user,
+					result: true
+				});
 			})
 		}
 	},
@@ -236,6 +243,7 @@ function selectListMQL(params, key, table, sort, success) {
 		})
 	})
 }
+
 /**
  * 执行数据库select语句
  * @param {请求参数} params 
@@ -321,11 +329,18 @@ function deleteMQL(params, table, success) {
 /**
  * 判断session_key权限
  */
-function checkSessionKey(request, user) {
+function checkToken(request, user) {
 	selectMQL({
 		token: request.headers['token']
 	}, "*", "user", "", res => {
-		user(res[0]);
+		if (res[0]) {
+			let time = new Date(res[0].vip_date).getTime();
+			let now = new Date().getTime();
+			res[0].vip = time > now;
+			user(res[0]);
+		} else {
+			user(null);
+		}
 	})
 }
 module.exports = {

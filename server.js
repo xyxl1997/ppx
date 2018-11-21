@@ -13,7 +13,7 @@ function start(route) {
 		response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "*");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type,session-key");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type,token");
         response.setHeader("Access-Control-Expose-Headers", "*");
 
         if (request.method=="OPTIONS") {
