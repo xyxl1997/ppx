@@ -175,7 +175,7 @@ var query = {
 		playCheckToken(request, success) {
 			checkToken(request, user => {
 				var ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress || '';
-				console.log(request.headers['x-forwarded-for'],request.connection.remoteAddress);
+				console.log(request.headers['x-forwarded-for'],request.connection.remoteAddress,request.socket.remoteAddress,request.connect.socket.remoteAddress);
 				success({
 					datas: {
 						user: user,
