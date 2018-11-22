@@ -174,8 +174,16 @@ var query = {
 		},
 		playCheckToken(request, success) {
 			checkToken(request, user => {
-				var ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress || '';
-				console.log(request.headers['x-forwarded-for'],request.connection.remoteAddress,request.socket.remoteAddress);
+				var ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.remoteAddress || "";
+				ip = ip.split(":")[3];
+				let sql = `update ppx.ip_count set \`play_count\` = \`play_count\`+1 where \`ip\` = '${ip}' `;
+				connection.query(sql,(error,res)=>{
+					if(error){
+						console.log(error);
+						return;
+					}
+					console.log(res)
+				})
 				success({
 					datas: {
 						user: user,
