@@ -172,10 +172,15 @@ var query = {
 				})
 			})
 		},
-		checkToken(request, success) {
+		playCheckToken(request, success) {
 			checkToken(request, user => {
+				var ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress || '';
+				console.log(request.connection.remoteAddress);
 				success({
-					datas: user,
+					datas: {
+						user: user,
+						play_count: 0
+					},
 					result: true
 				});
 			})

@@ -11,9 +11,9 @@ function route(pathname, request, response) {
 		now(request, res => {
 			write(response, res);
 		})
+		console.log(path);
 	} catch (e) {
 		console.log(path);
-		console.log(e);
 	}
 }
 
