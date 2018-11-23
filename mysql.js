@@ -53,10 +53,6 @@ var query = {
 				})
 				let sql = `select * from video where title like '%${params.title}%' order by id desc limit ${params.offset},${params.limit}`;
 				nativeSql(sql,res => {
-					if (error) {
-						console.log(error);
-						return;
-					}
 					success(res);
 				})
 			})
@@ -254,7 +250,7 @@ function selectListMQL(params, key, table, sort, success) {
 function nativeSql(sql, success) {
 	connection.query(sql, (error, res) => {
 		if (error) {
-			console.log(error);
+			console.log(1);
 			success({
 				message: "未知错误",
 				result: false
