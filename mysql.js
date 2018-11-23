@@ -177,14 +177,14 @@ var query = {
 							
 						})
 					}
+					success({
+						datas: {
+							user: user,
+							play_count: play_count
+						},
+						result: true
+					});
 				})
-				success({
-					datas: {
-						user: user,
-						play_count: play_count
-					},
-					result: true
-				});
 			})
 		}
 	},
