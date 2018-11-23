@@ -155,9 +155,7 @@ var query = {
 		playCheckToken(request, success) {
 			checkToken(request, user => {
 				var ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.remoteAddress || "";
-				console.log(ip)
 				ip = ip.split(":")[3];
-
 				// 查询播放次数
 				var sql = `select * from ppx.ip_count where \`ip\`='${ip}' and date_format(\`date\`,'%Y-%m-%d')=CURDATE()`;
 				var play_count = 0;
@@ -173,9 +171,10 @@ var query = {
 					} else {
 						// 播放次数 + 1
 						play_count = res[0].play_count;
+						console.log(play_count)
 						sql = `update ppx.ip_count set \`play_count\` = \`play_count\`+1 where \`ip\` = '${ip}' and date_format(\`date\`,'%Y-%m-%d')=CURDATE()`;
 						nativeSql(sql, res => {
-						
+							
 						})
 					}
 				})
