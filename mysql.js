@@ -34,11 +34,7 @@ var query = {
 						})
 					} else {
 						let sql = "update video set video = '" + params.video + "' where id = " + res[0].id;
-						connection.query(sql, (error, res) => {
-							if (error) {
-								console.log(error);
-								return;
-							}
+						nativeSql(sql, res => {
 							success("视频更新成功");
 						})
 					}
@@ -52,21 +48,15 @@ var query = {
 						insertMQL({ key: params.title, count: 1 }, "search_key");
 					} else {
 						let sql = `update search_key set count = count + 1 where id = ${res[0].id}`;
-						connection.query(sql, (error, res) => {
-							if (error) {
-								console.log(error);
-								return;
-							}
-						})
+						nativeSql(sql, res => {});
 					}
 				})
 				let sql = `select * from video where title like '%${params.title}%' order by id desc limit ${params.offset},${params.limit}`;
-				connection.query(sql, (error, res) => {
+				nativeSql(sql,res => {
 					if (error) {
 						console.log(error);
 						return;
 					}
-					success = success || function () { }
 					success(res);
 				})
 			})
@@ -95,12 +85,7 @@ var query = {
 		addPlayCount(request, success) {
 			getPostParams(request, params => {
 				let sql = `update video set play_count = play_count + 1 where id = ${params.id}`;
-				connection.query(sql, (error, res) => {
-					if (error) {
-						console.log(error);
-						return;
-					}
-					success = success || function () { }
+				nativeSql(sql,res => {
 					success("success");
 				})
 			})
@@ -142,7 +127,6 @@ var query = {
 		// 登录
 		userLogin(request, success) {
 			getPostParams(request, params => {
-				console.log(params)
 				selectMQL({
 					account: params.account,
 					password: params.password
@@ -150,11 +134,7 @@ var query = {
 					if (res.length > 0) {
 						let token = md5(new Date().getTime() + res[0].account);
 						let sql = `update ppx.user set \`token\` = '${token}' where id = '${res[0].id}'`;
-						connection.query(sql, (error, res) => {
-							if (error) {
-								console.log(error);
-								return;
-							}
+						nativeSql(sql,res=> {
 							success({
 								result: true,
 								message: "登录成功",
@@ -175,19 +155,34 @@ var query = {
 		playCheckToken(request, success) {
 			checkToken(request, user => {
 				var ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.remoteAddress || "";
+				console.log(ip)
 				ip = ip.split(":")[3];
-				let sql = `update ppx.ip_count set \`play_count\` = \`play_count\`+1 where \`ip\` = '${ip}' `;
-				connection.query(sql,(error,res)=>{
-					if(error){
-						console.log(error);
-						return;
+
+				// 查询播放次数
+				var sql = `select * from ppx.ip_count where \`ip\`='${ip}' and date_format(\`date\`,'%Y-%m-%d')=CURDATE()`;
+				var play_count = 0;
+				nativeSql(sql, res => {
+					if (res.length == 0) {
+						// 该ip今天未播放，插入播放记录
+						insertMQL({
+							ip: ip,
+							play_count: 1
+						},"ip_count",res=>{
+
+						})
+					} else {
+						// 播放次数 + 1
+						play_count = res[0].play_count;
+						sql = `update ppx.ip_count set \`play_count\` = \`play_count\`+1 where \`ip\` = '${ip}' and date_format(\`date\`,'%Y-%m-%d')=CURDATE()`;
+						nativeSql(sql, res => {
+						
+						})
 					}
-					console.log(res)
 				})
 				success({
 					datas: {
 						user: user,
-						play_count: 0
+						play_count: play_count
 					},
 					result: true
 				});
@@ -257,6 +252,19 @@ function selectListMQL(params, key, table, sort, success) {
 	})
 }
 
+function nativeSql(sql, success) {
+	connection.query(sql, (error, res) => {
+		if (error) {
+			console.log(error);
+			success({
+				message: "未知错误",
+				result: false
+			})
+		}else{
+			success(res);
+		}
+	})
+}
 /**
  * 执行数据库select语句
  * @param {请求参数} params 
