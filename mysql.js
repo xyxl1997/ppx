@@ -293,6 +293,7 @@ function getDate(timeStamp){
 	return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds()
 }
 function nativeSql(sql, success, rollback = false) {
+	console.log(sql)
 	connection.query(sql, (error, res) => {
 		if (error) {
 			if (rollback) {
