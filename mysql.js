@@ -212,7 +212,7 @@ var query = {
 												connection.rollback();
 												success({result:false,massage:"充值出错，请稍后重试"})
 											}
-										})
+										},true)
 									}else{
 										connection.rollback();
 										success({result:false,massage:"充值出错，请稍后重试"})
