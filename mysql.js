@@ -215,7 +215,7 @@ var query = {
 										},true)
 									}else{
 										connection.rollback();
-										success({result:false,massage:"充值出错，请稍后重试"})
+										success({result:false,massage:"充值出错，请稍后重试1"})
 									}
 								},true)
 							}
