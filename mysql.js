@@ -203,7 +203,7 @@ var query = {
 								nativeSql(`update ppx.user set \`vip_date\`='${getDate(date)}' where \`id\`='${user.id}' `,res=>{
 									if(res.affectedRows==1){
 										// 已充值，删除该卡密
-										nativeSql(`update ppx.card set \`isUsed\`='1',\`invest_time\`='${getDate(new Date().getTime())}' where \`password\`=${params.password}`,res=>{
+										nativeSql(`update ppx.card set \`isUsed\`='1',\`invest_time\`='${getDate(new Date().getTime())}' where \`password\`='${params.password}'`,res=>{
 											if(res.affectedRows==1){
 												success({
 													result:true,
