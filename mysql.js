@@ -48,11 +48,11 @@ var query = {
 						insertMQL({ key: params.title, count: 1 }, "search_key");
 					} else {
 						let sql = `update search_key set count = count + 1 where id = ${res[0].id}`;
-						nativeSql(sql, res => {});
+						nativeSql(sql, res => { });
 					}
 				})
 				let sql = `select * from video where title like '%${params.title}%' order by id desc limit ${params.offset},${params.limit}`;
-				nativeSql(sql,res => {
+				nativeSql(sql, res => {
 					success(res);
 				})
 			})
@@ -81,7 +81,7 @@ var query = {
 		addPlayCount(request, success) {
 			getPostParams(request, params => {
 				let sql = `update video set play_count = play_count + 1 where id = ${params.id}`;
-				nativeSql(sql,res => {
+				nativeSql(sql, res => {
 					success("success");
 				})
 			})
@@ -91,11 +91,10 @@ var query = {
 			getPostParams(request, params => {
 				selectMQL({ account: params.account }, "*", "user", "", res => {
 					if (res.length == 0) {
-						let now = new Date();
 						insertMQL({
 							account: params.account,
 							password: params.password,
-							vip_date: now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds()
+							vip_date: getDate(new Date().getTime())
 						}, "user", res => {
 							console.log(res)
 							if (res.id > 0) {
@@ -130,7 +129,7 @@ var query = {
 					if (res.length > 0) {
 						let token = md5(new Date().getTime() + res[0].account);
 						let sql = `update ppx.user set \`token\` = '${token}' where id = '${res[0].id}'`;
-						nativeSql(sql,res=> {
+						nativeSql(sql, res => {
 							success({
 								result: true,
 								message: "登录成功",
@@ -161,7 +160,7 @@ var query = {
 						insertMQL({
 							ip: ip,
 							play_count: 1
-						},"ip_count",res=>{
+						}, "ip_count", res => {
 
 						})
 					} else {
@@ -170,7 +169,7 @@ var query = {
 						console.log(play_count)
 						sql = `update ppx.ip_count set \`play_count\` = \`play_count\`+1 where \`ip\` = '${ip}' and date_format(\`date\`,'%Y-%m-%d')=CURDATE()`;
 						nativeSql(sql, res => {
-							
+
 						})
 					}
 					success({
@@ -181,6 +180,54 @@ var query = {
 						result: true
 					});
 				})
+			})
+		},
+		userInvest(request, success) {
+			checkToken(request, user => {
+				if (!user.user) {
+					success({
+						result: false,
+						message: "登录信息有误，请重新登录"
+					})
+				} else {
+					getPostParams(request, params => {
+						connection.beginTransaction();
+						selectMQL({ password: params.password }, "*", "card", "", res => {
+							if (res.length == 0) {
+								// 不存在卡密
+								success({ result: false, message: "无效的充值卡密！" });
+							} else {
+								// 存在卡密，充值
+								let date = new Date().getTime() + res[0].day * 24 * 60 * 60 * 1000;
+								nativeSql(`update ppx.user set \`vip_date\`=${getDate(date)}`,res=>{
+									if(res.affectedRows==1){
+										// 已充值，删除该卡密
+										nativeSql(`update ppx.card set \`isUsed\`='1' and \`invest_time\`='${getDate(new Date().getTime())}' where \`password\`=${params.password}`,res=>{
+											if(res.affectedRows==1){
+												success({
+													result:true,
+													message:"充值成功"
+												})
+											}else{
+												connection.rollback();
+												success({result:false,massage:"充值出错，请稍后重试"})
+											}
+										})
+									}else{
+										connection.rollback();
+										success({result:false,massage:"充值出错，请稍后重试"})
+									}
+								},true)
+							}
+						})
+						nativeSql(`delete from ppx.card where \`password\`=${params.password}`, res => {
+							if (res.affectedRows == 1) {
+								// 该卡密存在, 已删除
+
+							}
+						}, true)
+					})
+				}
 			})
 		}
 	},
@@ -246,16 +293,21 @@ function selectListMQL(params, key, table, sort, success) {
 		})
 	})
 }
-
-function nativeSql(sql, success) {
+function getDate(timeStamp){
+	let date = new Date(timeStamp);
+	return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds()
+}
+function nativeSql(sql, success, rollback = false) {
 	connection.query(sql, (error, res) => {
 		if (error) {
-			console.log(1);
+			if (rollback) {
+				connection.rollback();
+			}
 			success({
 				message: "未知错误",
 				result: false
 			})
-		}else{
+		} else {
 			success(res);
 		}
 	})
