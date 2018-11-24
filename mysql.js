@@ -199,11 +199,10 @@ var query = {
 							} else {
 								// 存在卡密，充值
 								let date = new Date().getTime() + res[0].day * 24 * 60 * 60 * 1000;
-								console.log(getDate)
 								nativeSql(`update ppx.user set \`vip_date\`='${getDate(date)}' where \`id\`='${user.id}' `,res=>{
 									if(res.affectedRows==1){
 										// 已充值，删除该卡密
-										nativeSql(`update ppx.card set \`isUsed\`='1' and \`invest_time\`='${getDate(new Date().getTime())}' where \`password\`=${params.password}`,res=>{
+										nativeSql(`update ppx.card set \`isUsed\`='1',\`invest_time\`='${getDate(new Date().getTime())}' where \`password\`=${params.password}`,res=>{
 											if(res.affectedRows==1){
 												success({
 													result:true,
@@ -216,7 +215,7 @@ var query = {
 										},true)
 									}else{
 										connection.rollback();
-										success({result:false,massage:"充值出错，请稍后重试1"})
+										success({result:false,massage:"充值出错，请稍后重试"})
 									}
 								},true)
 							}
