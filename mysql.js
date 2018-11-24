@@ -199,6 +199,7 @@ var query = {
 							} else {
 								// 存在卡密，充值
 								let date = new Date().getTime() + res[0].day * 24 * 60 * 60 * 1000;
+								console.log(getDate(date));
 								nativeSql(`update ppx.user set \`vip_date\`='${getDate(date)}' where \`id\`='${user.id}' `,res=>{
 									if(res.affectedRows==1){
 										// 已充值，删除该卡密
@@ -220,12 +221,6 @@ var query = {
 								},true)
 							}
 						})
-						nativeSql(`delete from ppx.card where \`password\`=${params.password}`, res => {
-							if (res.affectedRows == 1) {
-								// 该卡密存在, 已删除
-
-							}
-						}, true)
 					})
 				}
 			})
