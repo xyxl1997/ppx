@@ -184,7 +184,7 @@ var query = {
 		},
 		userInvest(request, success) {
 			checkToken(request, user => {
-				if (!user.user) {
+				if (!user) {
 					success({
 						result: false,
 						message: "登录信息有误，请重新登录"
@@ -406,7 +406,6 @@ function checkToken(request, user) {
 			let now = new Date().getTime();
 			res[0].vip = time > now;
 			user(res[0]);
-			console.log(res[0])
 		} else {
 			user(null);
 		}
