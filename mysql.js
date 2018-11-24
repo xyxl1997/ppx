@@ -406,6 +406,7 @@ function checkToken(request, user) {
 			let now = new Date().getTime();
 			res[0].vip = time > now;
 			user(res[0]);
+			console.log(res[0])
 		} else {
 			user(null);
 		}
