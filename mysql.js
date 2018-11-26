@@ -207,7 +207,6 @@ var query = {
 								}else{
 									date += new Date().getTime();
 								}
-								let date = new Date().getTime() + res[0].day * 24 * 60 * 60 * 1000;
 								console.log(getDate(date));
 								nativeSql(`update ppx.user set \`vip_date\`='${getDate(date)}' where \`id\`='${user.id}' `, res => {
 									if (res.affectedRows == 1) {
