@@ -166,8 +166,7 @@ var query = {
 					} else {
 						// 播放次数 + 1
 						play_count = res[0].play_count;
-						console.log(play_count)
-						sql = `update ppx.ip_count set \`play_count\` = \`play_count\`+1 where \`ip\` = '${ip}' and date_format(\`date\`,'%Y-%m-%d')=CURDATE()`;
+						sql = `update ppx.ip_count set \`play_count\` = \`play_count\`+1,\`date\`='${getDate(new Date().getTime())}' where \`ip\` = '${ip}' and date_format(\`date\`,'%Y-%m-%d')=CURDATE()`;
 						nativeSql(sql, res => {
 
 						})
@@ -207,7 +206,6 @@ var query = {
 								} else {
 									date += new Date().getTime();
 								}
-								console.log(getDate(date));
 								nativeSql(`update ppx.user set \`vip_date\`='${getDate(date)}' where \`id\`='${user.id}' `, res => {
 									if (res.affectedRows == 1) {
 										// 已充值，删除该卡密
