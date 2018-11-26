@@ -201,6 +201,12 @@ var query = {
 								success({ result: false, message: "无效的充值卡密！" });
 							} else {
 								// 存在卡密，充值
+								let date = res[0].day * 24 * 60 * 60 * 1000;
+								if(user.vip){
+									date += new Date(user.vip_date).getTime();
+								}else{
+									date += new Date().getTime();
+								}
 								let date = new Date().getTime() + res[0].day * 24 * 60 * 60 * 1000;
 								console.log(getDate(date));
 								nativeSql(`update ppx.user set \`vip_date\`='${getDate(date)}' where \`id\`='${user.id}' `, res => {
