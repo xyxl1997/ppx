@@ -202,9 +202,9 @@ var query = {
 							} else {
 								// 存在卡密，充值
 								let date = res[0].day * 24 * 60 * 60 * 1000;
-								if(user.vip){
+								if (user.vip) {
 									date += new Date(user.vip_date).getTime();
-								}else{
+								} else {
 									date += new Date().getTime();
 								}
 								console.log(getDate(date));
@@ -232,6 +232,14 @@ var query = {
 						})
 					})
 				}
+			})
+		},
+		getUserInfo(request, success) {
+			checkToken(request, user => {
+				success({
+					result: true,
+					user: user
+				})
 			})
 		}
 	},
