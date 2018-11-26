@@ -192,7 +192,10 @@ var query = {
 				} else {
 					getPostParams(request, params => {
 						connection.beginTransaction();
-						selectMQL({ password: params.password }, "*", "card", "", res => {
+						selectMQL({
+							password: params.password,
+							isUsed: 0
+						}, "*", "card", "", res => {
 							if (res.length == 0) {
 								// 不存在卡密
 								success({ result: false, message: "无效的充值卡密！" });
@@ -200,26 +203,26 @@ var query = {
 								// 存在卡密，充值
 								let date = new Date().getTime() + res[0].day * 24 * 60 * 60 * 1000;
 								console.log(getDate(date));
-								nativeSql(`update ppx.user set \`vip_date\`='${getDate(date)}' where \`id\`='${user.id}' `,res=>{
-									if(res.affectedRows==1){
+								nativeSql(`update ppx.user set \`vip_date\`='${getDate(date)}' where \`id\`='${user.id}' `, res => {
+									if (res.affectedRows == 1) {
 										// 已充值，删除该卡密
-										nativeSql(`update ppx.card set \`isUsed\`='1',\`invest_time\`='${getDate(new Date().getTime())}' where \`password\`='${params.password}'`,res=>{
-											if(res.affectedRows==1){
+										nativeSql(`update ppx.card set \`isUsed\`='1',\`invest_time\`='${getDate(new Date().getTime())}' where \`password\`='${params.password}'`, res => {
+											if (res.affectedRows == 1) {
 												connection.commit();
 												success({
-													result:true,
-													message:"充值成功"
+													result: true,
+													message: "充值成功"
 												})
-											}else{
+											} else {
 												connection.rollback();
-												success({result:false,massage:"充值出错，请稍后重试"})
+												success({ result: false, massage: "充值出错，请稍后重试" })
 											}
-										},true)
-									}else{
+										}, true)
+									} else {
 										connection.rollback();
-										success({result:false,massage:"充值出错，请稍后重试"})
+										success({ result: false, massage: "充值出错，请稍后重试" })
 									}
-								},true)
+								}, true)
 							}
 						})
 					})
@@ -289,7 +292,7 @@ function selectListMQL(params, key, table, sort, success) {
 		})
 	})
 }
-function getDate(timeStamp){
+function getDate(timeStamp) {
 	let date = new Date(timeStamp);
 	return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds()
 }
