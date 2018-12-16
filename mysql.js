@@ -239,6 +239,16 @@ var query = {
 					user: user
 				})
 			})
+		},
+		getHistory(request, success) {
+			getGetParams(request, params => {
+				nativeSql(`select * from ppx.video where id in (${params.history}) order by field(id,${params.history});`, res => {
+					success({
+						result: true,
+						datas: res
+					})
+				});
+			})
 		}
 	},
 
