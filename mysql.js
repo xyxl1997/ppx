@@ -10,7 +10,7 @@ function connect() {
 		host: '120.79.249.143',
 		user: 'xuyang',
 		password: 'xyxl1997',
-		database: 'ppx',
+		database: 'jm',
 		dateStrings: true,
 		port: '3306',
 		charset: 'UTF8MB4'
@@ -251,7 +251,219 @@ var query = {
 			})
 		}
 	},
-
+	jiumi: {
+		// 登录
+		userLogin(request, success) {
+			getPostParams(request, params => {
+				selectMQL({
+					account: params.account,
+					password: params.password
+				}, "*", "jm_user", "", res => {
+					if (res.length > 0) {
+						let token = md5(new Date().getTime() + res[0].account);
+						let sql = `update jm.jm_user set \`token\` = '${token}' where id = '${res[0].id}'`;
+						nativeSql(sql, res => {
+							success({
+								result: true,
+								message: "登录成功",
+								datas: {
+									token: token
+								}
+							})
+						})
+					} else {
+						success({
+							result: false,
+							message: "账号或密码错误"
+						})
+					}
+				})
+			})
+		},
+		// 签到
+		mark(request, success) {
+			checkJiumiToken(request, user => {
+				if (user) {
+					nativeSql(`select * from jm.jm_mark where user_id='${user.id}' and day(\`created_at\`)=day(now())`, res => {
+						if (res[0]) {
+							success({
+								result: false,
+								message: "您今日已签到"
+							})
+						} else {
+							insertMQL({
+								'user_id': user.id
+							}, 'jm_mark', res => {
+								success({
+									result: true,
+									datas: res,
+									message: "签到成功"
+								})
+							})
+						}
+					})
+				} else {
+					success({
+						result: false,
+						message: "令牌过期，请重新登录"
+					})
+				}
+			})
+		},
+		// 获取是否签到
+		getIsMark(request, success) {
+			checkJiumiToken(request, user => {
+				if (user) {
+					nativeSql(`select * from jm.jm_mark where user_id='${user.id}' and day(\`created_at\`)=day(now())`, res => {
+						success({
+							result: true,
+							datas: res[0] ? 1 : 0,
+							message: "获取成功"
+						})
+					})
+				} else {
+					success({
+						result: false,
+						message: "令牌过期，请重新登录"
+					})
+				}
+			})
+		},
+		// 获取当月签到记录
+		getMonthMark(request, success) {
+			checkJiumiToken(request, user => {
+				if (user) {
+					nativeSql(`select * from jm.jm_mark where user_id='${user.id}' and month(\`created_at\`)=month(now()) order by created_at`, res => {
+						success({
+							result: true,
+							datas: res,
+							message: "获取成功"
+						})
+					});
+				} else {
+					success({
+						result: false,
+						message: "令牌过期，请重新登录"
+					})
+				}
+			})
+		},
+		// 获取所有签到记录
+		getAllMark(request, success) {
+			checkJiumiToken(request, user => {
+				if (user) {
+					nativeSql(`select * from jm.jm_mark where user_id='${user.id}' order by created_at desc`, res => {
+						success({
+							result: true,
+							datas: res,
+							message: "获取成功"
+						})
+					});
+				} else {
+					success({
+						result: false,
+						message: "令牌过期，请重新登录"
+					})
+				}
+			})
+		},
+		// 添加纪念日
+		addDays(request, success) {
+			checkJiumiToken(request, user => {
+				if (user) {
+					getPostParams(request, params => {
+						insertMQL({
+							user_id: user.id,
+							date: params.date,
+							content: params.content
+						}, "jm.jm_days", res => {
+							success({
+								result: true,
+								datas: res,
+								message: "添加成功"
+							})
+						})
+					})
+				} else {
+					success({
+						result: false,
+						message: "令牌过期，请重新登录"
+					})
+				}
+			})
+		},
+		// 编辑纪念日
+		editDays(request, success) {
+			checkJiumiToken(request, user => {
+				if (user) {
+					getPostParams(request, params => {
+						nativeSql(`update jm.jm_days set date = '${params.date}',content = '${params.content}' where user_id = '${user.id}' and id = '${params.id}'`, res => {
+							success({
+								result: true,
+								datas: res,
+								message: "修改成功"
+							})
+						})
+					})
+				} else {
+					success({
+						result: false,
+						message: "令牌过期，请重新登录"
+					})
+				}
+			})
+		},
+		// 查询其他纪念日列表
+		getOtherDays(request, success) {
+			checkJiumiToken(request, user => {
+				if (user) {
+					selectListMQL({
+						user_id: user.id,
+						is_recommend: 0
+					}, "*", "jm.jm_days", 'order by id desc', res => {
+						res.rows.forEach(v => {
+							v.diffDay = getDiffDay(v.date);
+						})
+						success({
+							result: true,
+							datas: res,
+							message: "获取成功"
+						})
+					})
+				} else {
+					success({
+						result: false,
+						message: "令牌过期，请重新登录"
+					})
+				}
+			})
+		},
+		// 查询推荐纪念日
+		getRecDays(request, success) {
+			checkJiumiToken(request, user => {
+				if (user) {
+					selectListMQL({
+						user_id: user.id,
+						is_recommend: 1
+					}, "*", "jm.jm_days", '', res => {
+						res.rows.forEach(v => {
+							v.diffDay = getDiffDay(v.date);
+						})
+						success({
+							result: true,
+							datas: res,
+							message: "获取成功"
+						})
+					})
+				} else {
+					success({
+						result: false,
+						message: "令牌过期，请重新登录"
+					})
+				}
+			})
+		}
+	}
 
 	// upload: function (request, success) {
 	// 	var bucket = "xuyang"
@@ -305,7 +517,10 @@ function getGetParams(request, success) {
  */
 function selectListMQL(params, key, table, sort, success) {
 	let result = {};
-	selectMQL({}, "count(*) as total", table, "", res => {
+	let p = JSON.parse(JSON.stringify(params));
+	delete p.limit;
+	delete p.offset;
+	selectMQL(p, "count(*) as total", table, "", res => {
 		result.total = (JSON.parse(JSON.stringify(res)))[0].total;
 		selectMQL(params, key, table, sort, res => {
 			result.rows = res;
@@ -313,6 +528,7 @@ function selectListMQL(params, key, table, sort, success) {
 		})
 	})
 }
+// 时间戳获取日期
 function getDate(timeStamp) {
 	let date = new Date(timeStamp);
 	return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds()
@@ -332,6 +548,10 @@ function nativeSql(sql, success, rollback = false) {
 			success(res);
 		}
 	})
+}
+function getDiffDay(date) {
+	let timeDiff = new Date().getTime() - new Date(date).getTime();
+	return parseInt(timeDiff / 1000 / 60 / 60 / 24);
 }
 /**
  * 执行数据库select语句
@@ -426,6 +646,20 @@ function checkToken(request, user) {
 			let time = new Date(res[0].vip_date).getTime();
 			let now = new Date().getTime();
 			res[0].vip = time > now;
+			user(res[0]);
+		} else {
+			user(null);
+		}
+	})
+}
+/**
+ * 判断session_key权限 jiumi
+ */
+function checkJiumiToken(request, user) {
+	selectMQL({
+		token: request.headers['token']
+	}, "*", "jm_user", "", res => {
+		if (res[0]) {
 			user(res[0]);
 		} else {
 			user(null);

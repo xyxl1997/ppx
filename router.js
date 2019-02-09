@@ -13,7 +13,7 @@ function route(pathname, request, response) {
 		})
 		console.log(path);
 	} catch (e) {
-		console.log(path);
+		console.log(e);
 	}
 }
 
